@@ -1,0 +1,67 @@
+1						Arkose
+  2.6e+3  28.0e+9 0.1666  5.e+9    
+#
+#  Dens | Young | Pois | M_Biot | 
+#  1    |   2   |   3  |   4    |
+#
+   -0.4e0   100.  1.e-19    0.015    0.e-8    0.      0.05   0.0  
+#
+# ksi_0   | Cd    |  C1  |  C2    |  Cv    | tau_d | alpha | amp |  
+#  5      | 6     |  7   |  8     |   9    |  10   |   11  | 12  |
+#
+  1e-15   0.  0.04   0.0  0.e-9  13000. 0.0  -19000.0   0.04    0.0    40.e+6   0.
+#
+#   a1  | a2 | phi | amp |  P1 |  D1  | D2   |  D3  | Comp  | Eq_1 | Eq_2 | Fluidity |
+#   13  | 14 |  15 |  16 |  17 |  18  | 19   |  20  |  21   |  22  |  23  | 24       |
+#
+  50.   5.  1500.   3.0  
+#
+#   aL  | aT | hcs |lambd|  
+#   25  | 26 |  27 |  28 | 
+#
+
+1 = num of materials
+
+General properties:
+1 - density (kg/m^3)
+2 - Young  modulus (Pa)
+3 - Poisson ratio
+4 - Biot modulus (inverce of pressure storage = Kwater/porosity; Kwater = 2.e+9 Pa)
+
+
+Damage evolution:
+5   - ksi_0
+6   - rate(1) damage rate parameter (Cd) 
+7,8 - rate(2), rate(3) healing parameters (C1, C2)
+9   - Cv coefficient for damage-related viscosity (1/Pa)
+10  - rate(4) dynamic weakening
+11 - initial damage
+12 - amplidute of the random noise (alpha(x) = alpha + amp*random)
+
+Permeability & Porosity evolution: 
+13 - Permeability parameter a1: pre-exp
+14 - Permeability parameter a2: exp factor
+15 - initial porosity
+16 - amplidute of the random noise (phi(x) = phi + amp*random)
+17 - pressure-driven compaction rate 1/Pa*s
+18 - damage-porosity coupling - constant part, D1
+19 - damage-porosity coupling - Phi-dependent part, D2
+20 - damage-porosity coupling - alpha-dependent part, D3
+21 - Final compaction
+22 - equilibrium porosity pre-exp
+23 - equilibrium porosity exp term
+24 - fluidity = inverse of Maxwell viscosity
+25    aL=alpha L
+26    aT=alpha T
+27    hcs=heat capacity solid[J/kg C]
+28    lambda=thermal conductivity solid [W/m/C]
+
+
+
+R = mu_o*Cv 
+6.25e+10 * 1.6e-11 = 1
+
+Permeability parameters
+        a1=1.E-19
+        a2=12.
+

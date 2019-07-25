@@ -1,0 +1,12 @@
+include/
+*.o
+*.exe
+*.mod
+.*.swp
+.nfs*
+[0-9]*.nodes.dat
+[0-9]*.tetra.dat
+[0-9]*.tecplot.dat
+*.out
+.vscode/
+solver.cpp

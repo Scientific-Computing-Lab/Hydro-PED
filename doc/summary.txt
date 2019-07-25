@@ -1,0 +1,186 @@
+/*! @mainpage Hydro-PED Reservoir Stimulation Simulator
+@author Vladimir Lyakhovsky
+@author Eyal Shalev
+@author Harel Levin
+@author Gal Oren
+\section About
+HydroPED Simulation program was originally developed by Vladimir Lyakhovsky Eyal Shalev
+from the Geological Survey of Israel. The program performs modeling of
+hydraulic stimulation by welbore fluid injection. It combines physical
+aspects of rock mechanics and fluid diffusion. Currently, there is an ongoing
+efforts to make the hydrology component more efficiently, and to integrate
+a new component to the model which will add the aspects of heat advection.
+\section Introduction
+Hydro-PED is built out of two wings which calculates the cross-effects between the
+rock and the fluids. The part of rock mechanics was developed mainly by Vladimir.
+This code is based on his former researches which enabled the development of the
+commercial application called FLAC (Fast Lagrangian Analysis of Continuous). The
+hydrology part was developed by Eyal. It calculates diffusion using the Finite Elements
+Method, which translates the problem to linear equation of type Ax=b where A is a 
+sparse positive symmetric matrix, b is a known vector, and x is the variables vector.
+The two wings of the program, are calculated over the same grid but their timesteps
+may be varied. The mechanics of the rock causes changes in the structure of the rock, 
+which in turn changes the velocity of the reservoir, which influences the fluid's 
+stress and flow, which changes the forces that work over the rock and so on and so forth.
+Another part of the model, which is currently in development, is the heat model.
+\par 
+The following graph expresses the connections between the different modules. Let $V$ 
+stand for volume, \f$k\f$ is permeability, \f$v_f\f$ is flow velocity, \f$\rho\f$ is density and 
+\f$\mu\f$ is viscosity.
+\dot
+ digraph HydroPEDstructure {
+     node [shape=box];
+     rankdir="LR";
+     mechanics_rec [ label="Mechanics" URL="\ref mechanics"];
+     hydrology_rec [ label="Hydrology" URL="\ref hydrology"];
+     heat_rec [ label="Heat" URL="\ref heat"];
+     mechanics_rec -> hydrology_rec [ label=< V, k > ];
+     hydrology_rec -> heat_rec [ label=< v<sub>f</sub> > ];
+     heat_rec -> mechanics_rec [ label=< &rho;, &mu; > ];
+ }
+\enddot
+
+The dominant approach when integrating various physical modules, is to make some iterations
+for every timestep, which enables us to iteratively make the solution more accurate. For 
+instance, we can set a wanted accuracy level of fluid's density \f$\Delta \rho\f$ and make
+all the calculations, in all program's modules, over and over until at some iteration \f$n+1\f$
+we will achieve \f$\lVert \rho_{n+1} - \rho_{n} \rVert \leq \Delta \rho \f$. In Hydro-PED we
+assume that because the timesteps were calculated such that the cahnge in physical parameters 
+will be minimal, as will be explained later, we can neglect the iterative improvement. The 
+new values of the physical parameters will spread to the next timestep.
+
+\section mechanics Rock Mechanics Module
+The mechanical component of the program solves directly the equations of rock mechanincs
+in a direct and extremely efficient method. The timestep is adaptive and sometimes it can
+be in the resolution of a microsecond. <br>
+The timestep is calculated as follows. We set the balance of the system as \f$\frac{\sum F}
+{max{\left|F\right|}}\f$ where \f$F\f$ is the forces in the system. As much as the sum of
+the forces is smaller, the system is more balanced. Whenever the balance is smaller than a
+pre-defined value, the timestep will be increased by some factor, and vice-versa, when 
+the balance is bigger than some other value, which is referred as "off-balance" (boff),
+the timestep will be decreased by the same factor. In geological systems, there are no 
+drastic changes without any continuous progress, which is why there is no need to 
+dramatically change the value of the timestep, and an adaptive approach is more 
+appropriate. The values of the off-balance and the increase (respectively decrease) factor
+can be determined only by a trial and error process, according to the material which the system
+is made of. However, In a case where the rock is broke up, the timestep will jump down to
+the minimum value, as will be described later. <br>
+The module is  representing the system's space using tetrahedrons where each one is referred as
+an "element" every vertex of the tetrahedron is  referred as a "node". Some of the physical
+calculations are performed over an element, and some of them over a node. There are reciprocal
+relations between an element and his corresponding nodes. For example, the total mass of an
+element is divided equally to four such that it contributes quarter of element's mass to 
+each node's mass. Each node is shared between four elements, so node's total mass is the average
+masses of all his corresponding elements. <br>
+Stress creates strain. The strain is reflected by changing the place of the nodes of the
+different elements. This change creates deformation of the elements. In general, the calculation
+of the strain is performed by a three-dimensional velocity vector which set the place of the
+nodes after the strain. This velocity is determined by a combination of the force over the node
+and a damper which creates an opposite force and tend to balance the system (just like friction).
+The sum of the forces which influences a node, \f$\vec{F}\f$, combined with Frequency Independent 
+Damping force which is determined by a preconditioner \f$demf \in \left[0,1\right]\f$ which
+produces the net force \f$\vec{F}^*=\vec{F}-demf\cdot \vec{F}\f$. The velocity of each node
+is then calculated \f$v^+=v^-+\frac{\vec{F}^*}{m}\cdot \Delta t\f$. Now, using the calculated 
+velcity, the coordinates of each node are re-calculated.
+\par
+The following figure depicts a deforamtion of a tetrahedron. The blue color describes the 
+structure of the element before the strain, and the red color is the same tetrahedron
+after the strain.
+\image html deformation.svg 
+
+In one dimensional space, the strain of a \f$l\f$-long spring, which becomes \f$\Delta l\f$ 
+is calculated by \f$\varepsilon = \frac{\Delta l}{l}\f$. In three-dimensional space, the 
+strain is represented by a tensor:
+\f[
+\begin{bmatrix}
+    \varepsilon_{xx} & \varepsilon_{xy} & \varepsilon_{xz} \\
+    \varepsilon_{yx} & \varepsilon_{yy} & \varepsilon_{yz} \\
+    \varepsilon_{dx} & \varepsilon_{dy} & \varepsilon_{dz}
+\end{bmatrix}
+=
+\begin{bmatrix}
+    \frac{\partial{u_x}}{\partial{x}} & \frac{1}{2}\left(\frac{\partial{u_x}}{\partial{y}} + \frac{\partial{u_y}}{\partial{x}}\right) & \frac{1}{2}\left(\frac{\partial{u_x}}{\partial{z}} + \frac{\partial{u_z}}{\partial{x}}\right) \\
+    \frac{1}{2}\left(\frac{\partial{u_y}}{\partial{x}} + \frac{\partial{u_x}}{\partial{y}}\right) & \frac{\partial{u_y}}{\partial{y}} & \frac{1}{2}\left(\frac{\partial{u_y}}{\partial{z}} + \frac{\partial{u_z}}{\partial{y}}\right) \\
+    \frac{1}{2}\left(\frac{\partial{u_z}}{\partial{x}} + \frac{\partial{u_x}}{\partial{z}}\right) & \frac{1}{2}\left(\frac{\partial{u_z}}{\partial{y}} + \frac{\partial{u_y}}{\partial{z}}\right) & \frac{\partial{u_z}}{\partial{z}}
+\end{bmatrix}
+\f]
+
+The elements in the main diagonal are called Volumetric (or Bulk) Modulus. The rest of the 
+elements are called Shear Modulus. <br>
+Based on the strain, we use Hooke's law to calculate the force over the body. In 
+one-dimensional space, Hooke's law states that \f$F=k\cdot \varepsilon\f$. In 
+three-dimensional space, Hooke's law sets up a linear function \f$\Phi\f$ such that
+\f$\sigma=\Phi(\varepsilon)\f$. <br>
+At that point, the damage mechanics field of research is getting involved. When a rock is 
+being stressed up, it starts to create more and more fatigue, micro-cracks, which getting 
+bigger as much as the stress keep being applied or gets stronger. The amount of damage is
+noted as \f$\alpha \in [0,1] \f$ where \f$\alpha=0\f$ means an ideal material, without any
+fatigue, and \f$\alpha=1\f$ means a break up of the rock. The updated Hooke's law is 
+considering the damage of the rock so now \f$\sigma=\Phi \left(\varepsilon, \alpha \right)
+\f$. The next step is to calculate the force over each face. For a given normal vector 
+\f$\vec{n}=\begin{pmatrix}n_x & n_y & n_z\end{pmatrix}\f$ the force will be \f[\begin{bmatrix}
+F_1 \\ F_2 \\ F_3 \end{bmatrix}=\begin{bmatrix}
+\sigma_{xx} & \sigma_{xy} & \sigma_{xz} \\
+\sigma_{yx} & \sigma_{yy} & \sigma_{yz} \\
+\sigma_{zx} & \sigma_{zy} & \sigma_{zz}
+\end{bmatrix}\begin{bmatrix}n_x \\ n_y \\ n_z \end{bmatrix}\f]
+From the calculation decribed above we get the following data flow: stress creates strain,
+which in turn effects the stress and so on and so forth. Another factor in this process
+is the evaluation of the state of the material. Whenever the rock is breaking up, the strain
+will continue to deform the elements even without any force investment. From that point on
+the finite elemnts method is not usable anymore because the computation will not converge.
+FLAC method, however, will work as usual. <br>
+Whenever a break-up event has occured, the process performs actions in order to put the
+system in a balanced state once again. These actions, which defines a healing process, 
+are coded in the "drop" subroutine. In the case of a well, the healing process is performed 
+by fluids which seeps between the cracks, which decrease the stress inside the well and the
+gravity force is repairing the rock. <br>
+Sometimes, parts of the strain are irrevrsible. As in the case of heated plasticine clay.
+This strain is referred as irrevrsible strain or plastic strain. When we calculate the 
+force using Hooke's law, we should consider only the reversible (elastic) part of the strain.
+In general we can state that \f$\varepsilon_{total}=\varepsilon_{plastic}+\varepsilon_{elastic}\f$.
+
+\section hydrology Hydrology Module
+Whereas mechanics chages in the rock occure sometimes in a frequent manner, fluids changes 
+are relatively less frequent. For this reason, the hydrology timestep is never less than 
+10 seconds. However, when the system is in such blalanced state that the mechanics timestep is
+bigger than 10 seconds, the hydrology timestep will get his value from the mechanics timestep.
+The same goes to the heat module. In this way, the hydrology and head modules have an implicit
+adaptive timestep. <br>
+The hydrology module solves the differential equation:
+\f[S_\varepsilon\frac{\partial{p}}{\partial{t}}=\nabla\frac{k}{\mu}\nabla p+\alpha_B
+\frac{\partial{\varepsilon}}{\partial{t}}\f]
+The equations are being solved by finite elements method such that we should find vector
+\f$\vec{x}\f$ which represents the stress in the rock at the next timestep based on matrix
+\f$k\f$ which represents the state of the rock in terms of permeability and strain, 
+and vector \f$\vec{F}\f$ which represents the stress at the current timestep. We get the linear
+algebra equation: \f$k\times\vec{x}=\vec{F}\f$. <br>
+First of all, we calculate matrix \f$k_i\f$ and vector \f$\vec{F_i}\f$ for each element \f$i\f$
+using the "tetra" subroutine. each matrix \f$k_i\f$ is of size \f$4\time4\f$ because it 
+represents teh relations between element's nodes. Then, the program build the overall matrix 
+\f$k\f$ and vector \f$\vec{F}\f$ such that each row and column represents specific node. <br>
+From the description above it is easy to figure out that matrix \f$k\f$ is extremely sparse because
+every node has relations with at most another 12 nodes. Additionally, the matrix is symmetric
+because the diffusion effect is symmetric for each pair of nodes. The combination of these two
+characteristics points out that itertive solution methods should be very effective.
+
+\section heat Heat Advection Module
+The solution of the hydrology equations \f$FLUX=K_p\nabla P\f$ leads to a sparse, positive, 
+symmetric matrix. The solution of heat transfer equations leads to a sparse matrix, but
+asymmetric one. The cause to this difference is the fact that in the aspect of heat there
+are two components. The first component, diffusion is common to both heat and hydrology. The
+second component is heat advection where materials with mass performs tarnsition of heat on 
+themselves. This component is moving in a specific direction and so effects the structure 
+of the matrix asymmetrically. The equations the module should solve have the form of \f$
+FLUX=K_T\nabla T+advection\f$. <br>
+As mentioned above, the timestep of the heat module is the smae as the hydrology timestep. <br>
+The temperature is calculated by the equation: \f[
+\rho c_P \frac{\partial{T}}{\partial{t}}=\nabla \left(K_T \nabla T \right) + v_i \nabla T 
+\f]
+Where \f$\rho\f$ stands for fluid's density, \f$c_P\f$ is the heat capacity, \f$K_T\f$ is heat preconditioner. The density of the fluid is influenced by fluid's pressure which is calculated by: \f[
+\frac{\partial{P}}{\partial{t}}=\nabla\left(\frac{K_P}{\mu}\nabla P \right)+
+\left(M\frac{\partial{V}}{\partial{t}}\right)\f]
+Where \f$V\f$ is the volume, \f$P\f$ is the pressure, \f$K_P\f$ is the permeability of the
+material and \f$\mu\f$ is its viscosity. <br>
+As we mentioned, the heat module is currently under development.
+*/
