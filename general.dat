@@ -1,0 +1,11 @@
+0.8 0.05        damping factor, factor for time scale
+1.e-3  5.e-3    5.e-4 3.e-3      boff_min  boff_max
+0 0 9.81           Gravity (Gx, Gy, Gz)
+2000. 42000. 2000.             output for time from-to with delta
+
+
+
+2000. 400000. 2000.             output for time from-to with delta
+
+
+3.e+10 9.e+12 3.e+10     output for time from-to with delta

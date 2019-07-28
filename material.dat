@@ -1,0 +1,31 @@
+1
+2.6e+3  50.0e+9   0.25  0.e+9   -0.7  100. 1.e-19  0.015   0.e+0    0.2  0.0   1.0e-10   1.e-16  15.  1.0    ! granite
+
+
+
+Dens  | Young | Pois | M_Biot | ksi_0 | Cd |  C1  |  C2  |  tau_d | alpha | amp |  Cv    |   a1   | a2 | al_Biot
+ 1    |   2   |   3  |   4    |   5   | 6  |  7   |  8   |   9    |  10   | 11  |  12    |   13   | 14 |  15
+
+1 = one material
+
+1 - density (kg/m^3)
+2 - Young  modulus (Pa)
+3 - Poisson ratio
+4 - Biot modulus (inverce of pressure storage = Kwater/porosity; Kwater = 2.e+9 Pa)
+5 - ksi_0
+6,7,8 - damage rate parameters (Cd, C1, C2)
+9 - dynamic weakening
+10 - initial damage
+11 - amplidute of the random noise (alpha(x) = alpha + amp*random)
+12 - Cv coefficient for damage-related viscosity (1/Pa)
+13 - Permeability parameter a1: pre-exp
+14 - Permeability parameter a2: exp factor
+15 - alpha Biot
+
+R = mu_o*Cv 
+6.25e+10 * 1.6e-11 = 1
+
+Permeability parameters
+        a1=1.E-19
+        a2=12.
+
