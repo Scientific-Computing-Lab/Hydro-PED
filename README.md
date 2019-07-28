@@ -41,3 +41,4 @@ The tool *dat2tec.f90* converts *.nodes.dat and *.tetra.dat output files to tecp
 If you use the code for science or any form of scientific and technical dissemination activity, we kindly ask to cite the code using the following references:
 
  - Shalev, E., Lyakhovsky, V.: Modeling reservoir stimulation induced by wellbore fluid injection. In: Thirty Eighth Workshop on Geothermal Reservoir Engineering, Stanford University Stanford, California (2013)
+ - Levin, H., Oren, G., Shalev, E., Lyakhovsky, V.: Acceleration of Hydro Poro-elastic Damage Simulation in a Shared-Memory Environment, ([https://bit.ly/2LKUmC5](https://www.researchgate.net/publication/333651797_Acceleration_of_Hydro_Poro-elastic_Damage_Simulation_in_a_Shared-Memory_Environment)) (2019)
