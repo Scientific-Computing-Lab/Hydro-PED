@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 include/
 *.o
 *.exe
@@ -44,4 +43,3 @@ solver.cpp
 *.exe
 *.out
 *.app
->>>>>>> 22f5b5668c02055e773fd4de6acd9e14b1f85645
