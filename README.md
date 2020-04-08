@@ -43,7 +43,7 @@ If you use the code for science or any form of scientific and technical dissemin
  - Shalev, E., Lyakhovsky, V.: Modeling reservoir stimulation induced by wellbore fluid injection. In: Thirty Eighth Workshop on Geothermal Reservoir Engineering, Stanford University Stanford, California (2013)
 Additionally, please cite
 ```
-@inproceedings{DBLP:conf/parco/HarelParco19,
+@inproceedings{DBLP:conf/parco/LevinOSL19.bib,
   author    = {Harel Levin, 
                Gal Oren, 
                Eyal Shalev and 
@@ -62,7 +62,7 @@ Additionally, please cite
   publisher = {{IOS} Press},
   year      = {2020},
   doi       = {10.3233/APC200075},
-  biburl    = {https://dblp.org/rec/conf/parco/LevinOSL20.bib},
+  biburl    = {https://dblp.org/rec/conf/parco/LevinOSL19.bib},
   bibsource = {dblp computer science bibliography, https://dblp.org}
 }
 ```
