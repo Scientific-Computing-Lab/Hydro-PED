@@ -29,26 +29,29 @@ If you use the code for science or any form of scientific and technical dissemin
  - Shalev, E., Lyakhovsky, V.: Modeling reservoir stimulation induced by wellbore fluid injection. In: Thirty Eighth Workshop on Geothermal Reservoir Engineering, Stanford University Stanford, California (2013)
 Additionally, please cite
 ```
-@inproceedings{DBLP:conf/parco/LevinOSL19.bib,
-  author    = {Harel Levin, 
-               Gal Oren, 
-               Eyal Shalev and 
+@inproceedings{DBLP:conf/parco/Levin0SL19,
+  author    = {Harel Levin and
+               Gal Oren and
+               Eyal Shalev and
                Vladimir Lyakhovsky},
-  editor    = {Ian Foster and
+  editor    = {Ian T. Foster and
                Gerhard R. Joubert and
-               Luděk Kučera and
+               Ludek Kucera and
                Wolfgang E. Nagel and
-               Frans Peters},
-  title     = {Acceleration of Hydro Poro-Elastic Damage Simulation in a Shared-Memory Environment},
+               Frans J. Peters},
+  title     = {Acceleration of Hydro Poro-Elastic Damage Simulation in a Shared-Memory
+               Environment},
   booktitle = {Parallel Computing: Technology Trends, Proceedings of the International
-               Conference on Parallel Computing, Prague, Czech Republic, 10-13 September 2019},
+               Conference on Parallel Computing, {PARCO} 2019, Prague, Czech Republic,
+               September 10-13, 2019},
   series    = {Advances in Parallel Computing},
   volume    = {36},
   pages     = {341--353},
   publisher = {{IOS} Press},
-  year      = {2020},
-  doi       = {10.3233/APC200075},
-  biburl    = {https://dblp.org/rec/conf/parco/LevinOSL19.bib},
+  year      = {2019},
+  url       = {https://doi.org/10.3233/APC200059},
+  doi       = {10.3233/APC200059},
+  timestamp = {Fri, 24 Apr 2020 15:36:28 +0200},
+  biburl    = {https://dblp.org/rec/conf/parco/Levin0SL19.bib},
   bibsource = {dblp computer science bibliography, https://dblp.org}
-}
-```
+}```
